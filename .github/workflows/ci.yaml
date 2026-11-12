@@ -47,5 +47,50 @@ jobs:
                context: ./frontend
                file: ./frontend/Dockerfile
                push: True
-               tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest
+               tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-frontend:latest  
 
+   backend:
+        runs-on: ubuntu-latest
+        steps:
+           - name: Checkout code
+             uses: actions/checkout@v7
+
+           - name: Set up go
+             uses: actions/setup-go@v6
+             with:
+               go-version: '1.23'
+               go-version-file: 'go.mod'
+               cache: true
+               cache-dependency-path: backend/go.sum
+
+           - name: Run go formatter
+             run: go fmt
+             working-directory: ./backend  
+
+           - name: Run go Vet
+             run: go vet 
+             working-directory: ./backend 
+
+           - name: Run Tests
+             run: go test 
+             working-directory: ./backend
+
+           - name: Run Linter
+             run: golangci-lint run
+             working-directory: ./backend 
+
+          
+           - name: Docker Setup Login
+             uses: docker/login-action@v4
+             with:
+               username: ${{ vars.DOCKERHUB_USERNAME }}
+               password: ${{ secrets.DOCKERHUB_TOKEN }}
+ 
+           - name: Docker build and push
+             uses: docker/build-push-action@v7
+             with:
+               context: ./backend
+               file: ./backend/Dockerfile
+               push: True
+               tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest  
+   
