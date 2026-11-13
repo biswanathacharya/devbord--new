@@ -20,7 +20,14 @@ jobs:
               cache-dependency-path: backend/go.sum
 
            - name: Install Govulncheck
-             run: go get golang.org/x/net@v0.60.0
+             run: |
+                go get golang.org/x/net@v0.60.0
+                go mod tidy
+
+           - name: Download Go Dependencies
+             run: go mod download
+             working-directory: backend
+    
 
            - name: Govulncheck
              run: govulncheck ./...      
@@ -37,3 +44,4 @@ jobs:
            - name: Run dependency scan for Node
              run: npm audit
              working-directory: frontend
+             
