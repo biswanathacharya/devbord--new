@@ -5,7 +5,11 @@ name: CI
 
 on: 
   push: 
-    branches: [advanced]
+     paths: 
+        - '**'
+        - '!.github/workflows/**'
+     branches: [master]
+
 
 jobs: 
    frontend:
