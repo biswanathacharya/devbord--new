@@ -13,19 +13,19 @@ jobs:
           matrix:
                 go-version: [1.21, 1.22, 1.23]
         steps: 
-           - name: Checkout code
+           - name: Code Checkout
              uses: actions/checkout@v7
            - name: Setup Go
              uses: actions/setup-go@v6
              with: 
                 go-version: ${{ matrix.go-version }}
                 go-version-file: 'go.mod'
-                cache-dependency-path: backend/go.sum
+                cache-dependency-path: go.sum
 
            - name: Run go formatter
              run: go fmt
-             working-directory: backend       
+             working-directory: ./backend       
 
            - name: Run go Vet
              run: go vet
-             working-directory: backend                  
+             working-directory: ./backend                  
