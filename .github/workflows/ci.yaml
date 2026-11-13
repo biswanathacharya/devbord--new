@@ -4,10 +4,7 @@
 name: CI
 
 on: 
-  push: 
-     paths: 
-        - '**'
-        - '!.github/workflows/**'
+  workflow_dispatch: 
      branches: [master]
 
 
@@ -37,7 +34,6 @@ jobs:
            - name: Run Tests
              run: npm run test     
              working-directory: ./frontend
-
 
            - name: Docker Setup
              uses: docker/login-action@v4

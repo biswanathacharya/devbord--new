@@ -3,7 +3,8 @@
 name: CD
 
 on: 
-   workflow_call:
+   workflow_dispatch:
+       branches: [master]
 
 jobs:
    deploy:
