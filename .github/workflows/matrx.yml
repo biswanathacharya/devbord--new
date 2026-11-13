@@ -11,7 +11,7 @@ jobs:
         strategy:
           fail-fast: false
           matrix:
-                go-version: [1.21, 1.22, 1.23]
+                go-version: [1.25, 1.26, 1.27]
         steps: 
            - name: Code Checkout
              uses: actions/checkout@v7
