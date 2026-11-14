@@ -1,19 +1,21 @@
 
-# Stage 1: Build React application
-FROM node:26-slim AS build
+# =====================================
+# Stage 1: Build frontend
+# =====================================
+FROM dhi.io/node:26-dev AS build
 
 WORKDIR /app
 
-# Copy dependency files
+# Copy dependency manifests
 COPY package.json package-lock.json ./
 
-# Install dependencies
+# Install locked dependencies
 RUN npm ci --legacy-peer-deps
 
 # Copy application source
 COPY . .
 
-# Build-time environment variables
+# Vite build configuration
 ARG VITE_OTEL_ENABLED=false
 ARG VITE_OTEL_ENVIRONMENT=dev
 ARG VITE_APP_VERSION=dev
@@ -22,26 +24,26 @@ ENV VITE_OTEL_ENABLED=${VITE_OTEL_ENABLED}
 ENV VITE_OTEL_ENVIRONMENT=${VITE_OTEL_ENVIRONMENT}
 ENV VITE_APP_VERSION=${VITE_APP_VERSION}
 
-# Create production build
+# Build production frontend
 RUN npm run build
 
 
+# =====================================
 # Stage 2: Production runtime
-FROM nginx:stable-alpine
+# =====================================
+FROM nginxinc/nginx-unprivileged:stable-alpine
 
 # Copy production build
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Nginx configuration
+# Copy Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Set permissions for non-root execution
-RUN chown -R nginx:nginx /usr/share/nginx/html
-
-EXPOSE 80
+# Run Nginx on non-privileged port
+EXPOSE 8080
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
