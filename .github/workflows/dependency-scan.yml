@@ -17,12 +17,18 @@ jobs:
              with: 
               go-version: '1.26'
               go-version-file: 'backend/go.mod'
+              cache: true
               cache-dependency-path: backend/go.sum
 
+             # 3. Install Govulncheck
+        # 3. Install Govulncheck
            - name: Install Govulncheck
              run: |
-                go get golang.org/x/net@v0.60.0
-                go mod tidy
+              go install golang.org/x/vuln/cmd/govulncheck@latest
+              echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+              working-directory: backend
+  
+
 
            - name: Download Go Dependencies
              run: go mod download
@@ -44,4 +50,3 @@ jobs:
            - name: Run dependency scan for Node
              run: npm audit
              working-directory: frontend
-             
