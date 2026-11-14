@@ -1,60 +1,48 @@
-# Goal: I have to ensure the packages & dependencies have been audited for security
 
 name: Dependency Scanning
 
 on:
   workflow_call:
 
-jobs: 
-   dependency-scan:
-       runs-on: ubuntu-latest
-       steps:
-           - name: Code Checkout
-             uses: actions/checkout@v4
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
 
-           - name: Setup Go
-             uses: actions/setup-go@v5
-             with: 
-              go-version: '1.26.0'
-              go-version-file: 'backend/go.mod'
-              cache-dependency-path: backend/go.sum
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v7
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26.11'
+          cache: true
+          cache-dependency-path: backend/go.sum
 
-           - name: Download Go Dependencies
-             run: go mod download
-             working-directory: backend
-    
-           - name: Install Govulncheck
-             run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - name: Install Govulncheck
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-             
-        # 3. Install Govulncheck
-           - name: Install Govulncheck
-             continue-on-error: true
-             run: govluncheck ./...> govluncheck-report.txt
-             working-directory: backend
+      - name: Download Go Dependencies
+        working-directory: backend
+        run: go mod download
 
+      - name: Go Vulnerability Scan
+        working-directory: backend
+        run: govulncheck ./...
 
-           - name: Govulncheck
-             run: govulncheck ./...      
-             working-directory: backend
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
+      - name: Install Node Dependencies
+        working-directory: frontend
+        run: npm ci
 
-           - name: Setup Node
-             uses: actions/setup-node@v6
-             with: 
-                node-version: 20
-                cache: npm
-                cache-dependency-path: frontend/package-lock.json
-                
-           - name: Run dependency scan for Node
-             run: npm audit
-             working-directory: frontend
-  
-           - name: Upload Report to Artifacts
-             uses: actions/upload-artifact@v4
-             with:
-                name: dependency-scan-report
-                path: reports/dependency-report.txt
-                retention-days: 5
-
+      - name: Node Dependency Scan
+        working-directory: frontend
+        run: npm audit
