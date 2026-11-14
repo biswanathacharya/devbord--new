@@ -15,16 +15,17 @@ jobs:
            - name: Setup Go
              uses: actions/setup-go@v5
              with: 
+              go-version: '1.26.11'
               go-version-file: 'backend/go.mod'
-              cache: true
               cache-dependency-path: backend/go.sum
 
-           - name: Install Govulncheck
-             working-directory: ./backend
-             run: |
-               go install golang.org/x/vuln/cmd/govulncheck@latest
-               echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
+           - name: Download Go Dependencies
+             run: go mod download
+             working-directory: backend
+    
+           - name: Install Govulncheck
+             run: go install golang.org/x/vuln/cmd/govulncheck@latest
 
              
         # 3. Install Govulncheck
@@ -33,11 +34,6 @@ jobs:
              run: govluncheck ./...> govluncheck-report.txt
              working-directory: backend
 
-
-           - name: Download Go Dependencies
-             run: go mod download
-             working-directory: backend
-    
 
            - name: Govulncheck
              run: govulncheck ./...      
