@@ -25,15 +25,15 @@ FROM dhi.io/node:26-debian
 
 WORKDIR /app
 
-COPY --from=build /app/dist ./dist
+COPY --from=build --chown=node:node /app/dist ./dist
 
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/node_modules ./node_modules
 
-COPY vite.preview.config.js ./vite.config.js
+COPY --chown=node:node vite.preview.config.js ./vite.config.js
 
 EXPOSE 4173
 
-USER nobody
+USER node
 
 ENTRYPOINT ["node", "--no-warnings"]
 CMD ["./node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
