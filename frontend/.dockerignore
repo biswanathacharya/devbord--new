@@ -2,3 +2,17 @@ node_modules
 dist
 .git
 .DS_Store
+.github
+.npmrc
+*.md
+.eslintignore
+eslint.config.js
+postcss.config.js
+tailwind.config.js
+vitest.config.js
+node_modules
+dist
+.git
+.env
+.env.*
+coverage
