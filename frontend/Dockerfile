@@ -1,46 +1,47 @@
+
+# Stage 1: Build React application
 FROM node:26-slim AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+# Copy dependency files
+COPY package.json package-lock.json ./
 
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# Copy application source
 COPY . .
 
+# Build-time environment variables
 ARG VITE_OTEL_ENABLED=false
 ARG VITE_OTEL_ENVIRONMENT=dev
 ARG VITE_APP_VERSION=dev
 
-ENV VITE_OTEL_ENABLED=$VITE_OTEL_ENABLED \
-    VITE_OTEL_ENVIRONMENT=$VITE_OTEL_ENVIRONMENT \
-    VITE_APP_VERSION=$VITE_APP_VERSION
+ENV VITE_OTEL_ENABLED=${VITE_OTEL_ENABLED}
+ENV VITE_OTEL_ENVIRONMENT=${VITE_OTEL_ENVIRONMENT}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
 
+# Create production build
 RUN npm run build
 
-# Runtime stage
-FROM node:26-slim
 
-WORKDIR /app
+# Stage 2: Production runtime
+FROM nginx:stable-alpine
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Copy production build
+COPY --from=build /app/dist /usr/share/nginx/html
 
-COPY --from=build --chown=node:node /app/dist ./dist
-COPY --from=build --chown=node:node /app/package*.json ./
+# Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN npm ci --only=production --legacy-peer-deps && \
-    npm cache clean --force && \
-    rm -rf /tmp/* /var/tmp/*
+# Set permissions for non-root execution
+RUN chown -R nginx:nginx /usr/share/nginx/html
 
-COPY --chown=node:node vite.preview.config.js ./vite.config.js
+EXPOSE 80
 
-USER node
-
-EXPOSE 4173
-
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:4173', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
+    CMD wget -q -O /dev/null http://127.0.0.1/ || exit 1
 
-ENTRYPOINT ["node", "--no-warnings"]
-CMD ["./node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
+CMD ["nginx", "-g", "daemon off;"]
