@@ -21,7 +21,7 @@ ENV VITE_OTEL_ENABLED=$VITE_OTEL_ENABLED \
 
 RUN npm run build
 
-FROM dhi.io/node:26
+FROM dhi.io/node:26-debian
 
 WORKDIR /app
 
@@ -32,6 +32,8 @@ COPY --from=build /app/node_modules ./node_modules
 COPY vite.preview.config.js ./vite.config.js
 
 EXPOSE 4173
+
+USER nobody
 
 ENTRYPOINT ["node", "--no-warnings"]
 CMD ["./node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "4173"]
