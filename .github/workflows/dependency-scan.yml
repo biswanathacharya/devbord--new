@@ -50,8 +50,7 @@ jobs:
              working-directory: frontend
   
            - name: Upload Report to Artifacts
-             if: always() 
-             uses: action/upload-artifact@v4
+             uses: actions/upload-artifact@v4
              with:
                 name: dependency-scan-report
                 path: reports/dependency-report.txt
