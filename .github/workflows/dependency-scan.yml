@@ -46,3 +46,9 @@ jobs:
       - name: Node Dependency Scan
         working-directory: frontend
         run: npm audit
+
+
+
+      - name: Run NPM Security Audit
+        working-directory: frontend
+        run: npm audit
