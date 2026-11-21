@@ -25,6 +25,6 @@ jobs:
 
            - name: Deploy the containers with Docker Compose
              run: |
-              docker compose pull 
-              docker compose up -d --build
+              docker compose pull
+              COMPOSE_PARALLEL_LIMIT=1  docker compose up -d --build
               
