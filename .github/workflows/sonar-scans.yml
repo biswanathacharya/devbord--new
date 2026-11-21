@@ -1,0 +1,19 @@
+# Goal: To check wheather the application code coverage doesn't have security threats
+name: Sonarqube Scan
+
+on:
+   workflow_call:
+    
+    
+jobs:
+    sonar-scanner:
+       runs-on: ubuntu-latest
+       steps:
+          - name: Code checkout
+            uses: actions/checkout@v7
+            
+    
+          - name: SonarQube Scan
+            uses: SonarSource/sonarqube-scan-action@v8.5.0 # Ex: v8.3.0 or sha1, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+            env:
+              SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
