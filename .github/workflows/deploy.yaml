@@ -2,9 +2,9 @@
 
 name: CD
 
-on: 
-   workflow_dispatch:
-       branches: [master]
+on:
+  workflow_call:
+             
 
 jobs:
    deploy:
@@ -27,3 +27,4 @@ jobs:
              run: |
               docker compose pull 
               docker compose up -d --build
+              
