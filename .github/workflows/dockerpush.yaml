@@ -1,16 +1,20 @@
 # Goal - I have a lint,Build,Test the code for Frontend and Backend 
 #Then push the image to Docker Hub
 
-name: CI
+name: Docker Push
 
 on: 
-  workflow_dispatch: 
+  workflow_call: 
      
 
 
 jobs: 
    frontend:
         runs-on: ubuntu-latest
+        strategy: 
+             fail-fast: false
+             matrix:
+                 folders: ['backend','frontend']
         steps:
            - name: Checkout code
              uses: actions/checkout@v7
@@ -84,10 +88,21 @@ jobs:
            - name: Docker build and push
              uses: docker/build-push-action@v7
              with:
-               context: ./backend
+               context: ./${{ matrix.folders }}
                file: ./backend/Dockerfile
                push: True
-               tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-backend:latest 
+               tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders }}:latest 
+
+            
+            
+           - name: Docker build and push
+             uses: docker/build-push-action@v7
+             with:
+               context: ./${{ matrix.folders }}
+               file: ./frontend/Dockerfile
+               push: True
+               tags: ${{ vars.DOCKERHUB_USERNAME }}/devboard-${{ matrix.folders }}:latest 
+   
 
    Deploy: 
         needs: [frontend, backend]
