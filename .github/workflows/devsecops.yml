@@ -27,6 +27,6 @@ jobs:
        secrets: inherit
        
        #Sonarqube    
-       sonar_qube:
+   sonar-qube:
              uses: ./.github/workflows/sonar-scans.yml
              secrets: inherit 
