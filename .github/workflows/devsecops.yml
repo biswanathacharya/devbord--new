@@ -41,7 +41,7 @@ jobs:
 
     ##------CD----------
     
-    deploy: 
+   deploy: 
        needs: [docker-push]
        uses: ./.github/workflows/deploy.yaml  
        secrets: inherit 
